@@ -1,0 +1,32 @@
+[project]
+name = "django-totp"
+dynamic = ["version"]
+authors = [{ name = "Kumar Sahil", email = "krsahil8825@gmail.com" }]
+maintainers = [{ name = "Kumar Sahil", email = "krsahil8825@gmail.com" }]
+description = "A Helper library to implement Time-based One-Time Password (TOTP) in Django applications."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.0.4",
+]
+
+[project.urls]
+Homepage = "https://krsahil8825.github.io/django-totp/"
+Documentation = "https://krsahil8825.github.io/django-totp/"
+Repository = "https://github.com/krsahil8825/django-totp"
+Issues = "https://github.com/krsahil8825/django-totp/issues/"
+
+[build-system]
+requires = ["setuptools>=68", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+version_scheme = "release-branch-semver"
+local_scheme = "no-local-version"
