@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>JSON to TXT</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #f5f5f5;
+                color: #222;
+                padding: 20px;
+            }
+
+            .wrap {
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            textarea,
+            input {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 12px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                font-family: Consolas, monospace;
+                font-size: 14px;
+            }
+
+            textarea {
+                min-height: 220px;
+                resize: vertical;
+            }
+
+            input {
+                margin-bottom: 12px;
+            }
+
+            button {
+                margin: 12px 12px 12px 0;
+                padding: 10px 16px;
+                border: 0;
+                border-radius: 8px;
+                background: #111;
+                color: #fff;
+                cursor: pointer;
+            }
+
+            #preview {
+                margin-top: 16px;
+                padding: 16px;
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                white-space: pre-wrap;
+                font-family: Consolas, monospace;
+                overflow: auto;
+                min-height: 120px;
+            }
+
+            .hint {
+                color: #666;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="wrap">
+            <h1>JSON to TXT</h1>
+            <p class="hint">Paste JSON like {"backup_codes":["code1","code2"]}, then download a text file.</p>
+
+            <label for="filename">File name</label>
+            <input id="filename" type="text" value="backup_codes.txt" />
+
+            <label for="input">JSON input</label>
+            <textarea id="input" spellcheck="false" placeholder='Paste JSON here'></textarea>
+
+            <button type="button" onclick="downloadTxt()">Download TXT</button>
+        </div>
+
+        <script>
+            function jsonToTxt(value, key = 'backup_codes') {
+                let data = value;
+
+                if (typeof data === 'string') {
+                    const trimmed = data.trim();
+                    if (!trimmed) {
+                        return '';
+                    }
+
+                    data = JSON.parse(trimmed);
+                }
+
+                if (!data || typeof data !== 'object') {
+                    return '';
+                }
+
+                const codes = data[key];
+                if (!Array.isArray(codes)) {
+                    return '';
+                }
+
+                return codes
+                    .map((item) => String(item).trim())
+                    .filter(Boolean)
+                    .join('\n');
+            }
+
+            function downloadTxt() {
+                const inputValue = document.getElementById('input').value;
+                const fileName = document.getElementById('filename').value.trim() || 'output.txt';
+                let text = '';
+
+                try {
+                    text = jsonToTxt(inputValue, 'backup_codes');
+                } catch (error) {
+                    document.getElementById('preview').textContent = 'Invalid JSON input.';
+                    return;
+                }
+
+                if (!text) {
+                    document.getElementById('preview').textContent = 'No backup_codes array found.';
+                    return;
+                }
+
+                document.getElementById('preview').textContent = text;
+
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName.endsWith('.txt') ? fileName : `${fileName}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            }
+        </script>
+    </body>
+
+</html>
