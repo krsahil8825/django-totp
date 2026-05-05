@@ -21,7 +21,7 @@ def is_totp_enabled(user: User) -> bool:
     return Totp.objects.filter(user=user).exists()
 
 
-def generate_temp_signed_token(user: User) -> str:
+def generate_challenge_token(user: User) -> str:
     """Generate a temporary signed token for TOTP verification."""
 
     data = {
@@ -32,7 +32,7 @@ def generate_temp_signed_token(user: User) -> str:
     return signing.dumps(data, salt=TOKEN_SALT)
 
 
-def verify_temp_signed_token(token: str) -> int:
+def verify_challenge_token(token: str) -> int:
     """Verify and extract user ID from a signed TOTP verification token."""
     try:
         data = signing.loads(
@@ -49,9 +49,9 @@ def verify_temp_signed_token(token: str) -> int:
         raise BadSignature("Invalid or tampered TOTP token.") from exc
 
 
-def get_user_from_temp_signed_token(token: str) -> User:
+def get_user_from_challenge_token(token: str) -> User:
     """Retrieve a user from a signed TOTP verification token."""
     try:
-        return User.objects.get(id=verify_temp_signed_token(token))
+        return User.objects.get(id=verify_challenge_token(token))
     except User.DoesNotExist:
         raise User.DoesNotExist("User not found.")
