@@ -21,4 +21,4 @@ class BackupCodeListSerializer(serializers.Serializer):
 class TotpConfirmRequestSerializer(BackupCodeListSerializer):
     """Request payload used to confirm a TOTP enrollment."""
 
-    input_code = serializers.CharField(trim_whitespace=True)
+    input_code = serializers.CharField(trim_whitespace=True, write_only=True)
