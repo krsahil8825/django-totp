@@ -39,5 +39,6 @@ local_scheme = "no-local-version"
 
 [dependency-groups]
 dev = [
+    "djoser>=2.3.3",
     "drf-spectacular>=0.29.0",
 ]

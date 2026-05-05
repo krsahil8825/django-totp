@@ -118,9 +118,4 @@ theme/static_src/node_modules/
 theme/static/css/dist/
 staticfiles/
 
-
-# dummy project confi for dev
-django_totp_project/
-manage.py
-
 # End of file

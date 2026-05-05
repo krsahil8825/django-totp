@@ -24,7 +24,7 @@ class TotpViewSet(viewsets.GenericViewSet):
     def get_serializer_class(self):
         """Return the serializer that matches the current action."""
 
-        if self.action == "create":
+        if self.action == "enroll":
             return TotpCreateResponseSerializer
         elif self.action == "confirm":
             return TotpConfirmRequestSerializer
@@ -34,8 +34,8 @@ class TotpViewSet(viewsets.GenericViewSet):
             return BackupCodeListSerializer
         return super().get_serializer_class()
 
-    @action(detail=False, methods=["post"])
-    def create(self, request):
+    @action(detail=False, methods=["post"], url_path="create", url_name="create")
+    def enroll(self, request):
         """Start TOTP enrollment and return the provisioning QR code."""
 
         try:
