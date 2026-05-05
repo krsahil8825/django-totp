@@ -10,6 +10,7 @@ requires-python = ">=3.14"
 dependencies = [
     "cryptography>=47.0.0",
     "django>=6.0.4",
+    "djangorestframework>=3.17.1",
     "pyotp>=2.9.0",
     "qrcode>=8.2",
 ]
@@ -33,3 +34,8 @@ where = ["src"]
 [tool.setuptools_scm]
 version_scheme = "release-branch-semver"
 local_scheme = "no-local-version"
+
+[dependency-groups]
+dev = [
+    "drf-spectacular>=0.29.0",
+]
