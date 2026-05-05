@@ -1,0 +1,5 @@
+# Exclude development-only Django project artifacts from sdist
+prune src/django_totp_project
+exclude src/manage.py
+exclude src/db.sqlite3
+prune src/django_totp.egg-info

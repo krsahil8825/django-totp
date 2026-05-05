@@ -30,6 +30,8 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["django_totp*"]
+exclude = ["django_totp_project*"]
 
 [tool.setuptools_scm]
 version_scheme = "release-branch-semver"
