@@ -45,15 +45,7 @@ db.sqlite3
 db.sqlite3-journal
 media/
 /staticfiles/
-# If you collect static files into a directory called "static" in repo, do NOT ignore it
 
-# Django migrations - usually tracked; uncomment to ignore local migrations
-# ------------------------------------------------------------------------------------------------------
-# NOTE: Right now this is ignored because we are still in development and migrations 
-# are changing frequently. Once we stabilize the models, we should track migrations in version control.
-# ------------------------------------------------------------------------------------------------------
-*/migrations/*.py
-*/migrations/*.pyc
 
 # Sentry
 sentry_sdk.db
@@ -125,5 +117,10 @@ mysql/
 theme/static_src/node_modules/
 theme/static/css/dist/
 staticfiles/
+
+
+# dummy project confi for dev
+django_totp_project/
+manage.py
 
 # End of file
