@@ -1,9 +1,4 @@
-"""
-django_totp.utils
-========================
-
-Utility functions for TOTP backup code management.
-"""
+"""Persistence and verification helpers for encrypted backup codes."""
 
 from cryptography.fernet import InvalidToken
 from django.contrib.auth.models import User
@@ -11,41 +6,31 @@ from django.db import transaction
 from secrets import compare_digest
 
 from .backup_code import generate_backup_codes
-from .encryption import encrypt, decrypt
-from .models import Totp, BackupCode
+from .encryption import decrypt, encrypt
+from .models import BackupCode, Totp
 
 
-def save_backup_codes(user: User, codes: list[str]) -> list[str]:
-    """
-    Store encrypted backup codes for a user.
+def _get_user_totp_model_obj(user: User) -> Totp:
+    """Return the TOTP record for a user or raise a helpful error."""
 
-    Any previously stored backup codes are deleted before saving the new set.
+    totp = Totp.objects.filter(user=user).first()
+    if not totp:
+        raise ValueError("User does not have an associated TOTP secret.")
 
-    Note:
-        The plaintext codes are returned because the user must be able to
-        view and securely store them at least once. After this point, only
-        the encrypted versions are retained in the database, and the
-        plaintext values cannot be retrieved again.
+    return totp
 
-    Args:
-        user (User): The user for whom the backup codes are generated.
-        codes (list[str]): A list of plaintext backup codes.
 
-    Returns:
-        list[str]: The plaintext backup codes that were just saved.
-    """
+def store_backup_codes(user: User, codes: list[str]) -> list[str]:
+    """Replace a user's backup codes with the provided plaintext values."""
 
     with transaction.atomic():
-        totp_qs = Totp.objects.filter(user=user).first()
-        if not totp_qs:
-            raise ValueError("User does not have an associated TOTP secret.")
+        totp = _get_user_totp_model_obj(user)
 
-        # remove existing backup codes before saving new ones
-        BackupCode.objects.filter(totp=totp_qs).delete()
+        BackupCode.objects.filter(totp=totp).delete()
 
         backup_codes = [
             BackupCode(
-                totp=totp_qs,
+                totp=totp,
                 code=encrypt(code),
             )
             for code in codes
@@ -57,23 +42,13 @@ def save_backup_codes(user: User, codes: list[str]) -> list[str]:
 
 
 def verify_backup_code(user: User, input_code: str) -> bool:
-    """
-    Verify a backup code and mark it as used.
+    """Verify a backup code, then mark the matched code as used."""
 
-    Args:
-        user (User): Target user.
-        input_code (str): Code provided by user.
-
-    Returns:
-        bool: True if valid, False otherwise.
-    """
     with transaction.atomic():
-        totp_qs = Totp.objects.filter(user=user).first()
-        if not totp_qs:
-            raise ValueError("User does not have an associated TOTP secret.")
+        totp = _get_user_totp_model_obj(user)
 
         backup_codes = BackupCode.objects.select_for_update().filter(
-            totp=totp_qs,
+            totp=totp,
             is_used=False,
         )
 
@@ -91,20 +66,9 @@ def verify_backup_code(user: User, input_code: str) -> bool:
     return False
 
 
-def regenerate_backup_codes(user: User) -> list[str]:
-    """
-    Regenerate backup codes for a user.
-
-    This function deletes all existing backup codes and generates a new set of
-    plaintext backup codes, which are then encrypted and stored in the database.
-
-    Args:
-        user (User): The user for whom to regenerate backup codes.
-
-    Returns:
-        list[str]: The new plaintext backup codes that were generated.
-    """
+def rotate_backup_codes(user: User) -> list[str]:
+    """Generate and persist a fresh backup-code set for a user."""
 
     new_codes = generate_backup_codes()
 
-    return save_backup_codes(user, new_codes)
+    return store_backup_codes(user, new_codes)

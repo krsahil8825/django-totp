@@ -1,109 +1,75 @@
-"""
-django_totp.totp
-================
+"""High-level TOTP lifecycle helpers for Django users."""
 
-This module provides functionality for managing TOTP secrets and backup codes for users.
-"""
-
-from django.contrib.auth.models import User
 from django.conf import settings as django_settings
-from typing import List
-import pyotp
+from django.contrib.auth.models import User
 
-from .backup_code_utils import save_backup_codes
-from .encryption import encrypt, decrypt
-from .models import Totp, BackupCode
-from .qrsvg import generate_qr_code_svg
+import pyotp
+from typing import List
+
+from .backup_code import generate_backup_codes
+from .backup_code_utils import store_backup_codes
+from .encryption import decrypt, encrypt
+from .models import BackupCode, Totp
+from .qrsvg import render_qr_code_svg
 
 
 TOTP_ISSUER = getattr(django_settings, "TOTP_ISSUER", "MyApp")
 
 
 def generate_totp_secret() -> str:
-    """
-    Generate a random TOTP secret.
-
-    Returns:
-        str: A base32-encoded TOTP secret.
-    """
+    """Return a new base32-encoded TOTP secret."""
 
     return pyotp.random_base32()
 
 
-def verify_user_totp_input(user: User, input_code: str) -> bool:
-    """
-    Verify a user's TOTP input code against their stored secret.
-
-    Args:
-        user (User): The user whose TOTP code is being verified.
-        input_code (str): The TOTP code input by the user.
-
-    Returns:
-        bool: True if the code is valid, False otherwise.
-    """
+def verify_totp_code(user: User, input_code: str) -> bool:
+    """Verify a user's one-time code against the stored encrypted secret."""
 
     totp_qs = Totp.objects.filter(user=user).first()
     if not totp_qs:
         raise ValueError("User does not have an associated TOTP secret.")
 
-    totp = pyotp.TOTP(decrypt(totp_qs.secret))
+    totp = pyotp.TOTP(decrypt(totp_qs.secret_key))
 
-    return totp.verify(input_code, valid_window=1)  # allow 1 time step before/after
+    return totp.verify(input_code, valid_window=1)
 
 
-def create_totp(user: User) -> str:
-    """
-    Create a TOTP secret for a user.
+def create_totp_setup(user: User) -> str:
+    """Create and persist a new TOTP secret, then return the QR-code SVG."""
 
-    Args:
-        user (User): The user for whom the TOTP secret is being created.
-
-    Returns:
-        str: QR code SVG content as a string.
-    """
-
-    if BackupCode.objects.filter(totp__user=user).exists():
+    if Totp.objects.filter(user=user).exists():
         raise ValueError("TOTP already exists for this user.")
 
     secret = generate_totp_secret()
 
-    Totp.objects.create(user=user, secret=encrypt(secret))
+    Totp.objects.create(user=user, secret_key=encrypt(secret))
 
     uri = pyotp.TOTP(secret).provisioning_uri(
         name=user.get_username(), issuer_name=TOTP_ISSUER
     )
 
-    return generate_qr_code_svg(uri)
+    return render_qr_code_svg(uri)
 
 
 def confirm_totp_setup(user: User, input_code: str) -> List[str]:
-    """
-    Confirm TOTP setup by verifying the user's input code.
-
-    Args:
-        user (User): The user confirming their TOTP setup.
-        input_code (str): The TOTP code input by the user.
-
-    Returns:
-        List[str]: A list of plaintext backup codes if verification is successful.
-    """
+    """Confirm TOTP enrollment and return freshly generated backup codes."""
 
     totp_qs = Totp.objects.filter(user=user).first()
     if not totp_qs:
         raise ValueError("User does not have an associated TOTP secret.")
 
-    if not verify_user_totp_input(user, input_code):
+    if not verify_totp_code(user, input_code):
         raise ValueError("Invalid TOTP code.")
 
-    return save_backup_codes(user)
+    return store_backup_codes(user, generate_backup_codes())
 
 
 def disable_totp(user: User) -> None:
-    """
-    Disable TOTP for a user by deleting their TOTP secret and backup codes.
+    """Remove the user's TOTP secret and any stored backup codes."""
 
-    Args:
-        user (User): The user for whom TOTP should be disabled.
-    """
+    totp_qs = Totp.objects.filter(user=user).first()
+    if not totp_qs:
+        raise ValueError("User does not have an associated TOTP secret.")
 
-    Totp.objects.filter(user=user).delete()
+    BackupCode.objects.filter(totp=totp_qs).delete()
+    totp_qs.delete()

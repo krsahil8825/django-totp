@@ -1,22 +1,23 @@
-"""
-django_totp.encryption
-=======================
-
-This module provides encryption and decryption utilities for 
-TOTP secrets using Fernet symmetric encryption.
-"""
-
+"""Fernet helpers for encrypting and decrypting TOTP secrets."""
 
 from cryptography.fernet import Fernet
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings as django_settings
+from django.core.exceptions import ImproperlyConfigured
 
 
-def get_valid_fernet_key(default=None):
-    raw_key = getattr(django_settings, "DJANGO_TOTP_ENCRYPTION_KEY")
+def generate_fernet_key() -> str:
+    """Generate and return a new Fernet key."""
+
+    return Fernet.generate_key().decode()
+
+
+def resolve_fernet_key(default: str | bytes | None = None) -> bytes:
+    """Return a valid Fernet key from Django settings or a fallback value."""
+
+    raw_key = getattr(django_settings, "DJANGO_TOTP_ENCRYPTION_KEY", None)
 
     if raw_key:
-        key = raw_key.encode()
+        key = raw_key.encode() if isinstance(raw_key, str) else raw_key
     elif default is not None:
         key = default if isinstance(default, bytes) else default.encode()
     else:
@@ -26,7 +27,7 @@ def get_valid_fernet_key(default=None):
 
     try:
         Fernet(key)
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - defensive validation
         raise ImproperlyConfigured(
             "DJANGO_TOTP_ENCRYPTION_KEY must be a valid Fernet key."
         ) from exc
@@ -34,30 +35,16 @@ def get_valid_fernet_key(default=None):
     return key
 
 
-_fernet = Fernet(get_valid_fernet_key())
+_fernet = Fernet(resolve_fernet_key())
 
 
 def encrypt(value: str) -> str:
-    """
-    Encrypt a string using Fernet symmetric encryption.
+    """Encrypt and return a URL-safe Fernet token."""
 
-    Args:
-        value (str): Plain text value.
-
-    Returns:
-        str: Encrypted string (URL-safe base64 encoded).
-    """
     return _fernet.encrypt(value.encode()).decode()
 
 
 def decrypt(value: str) -> str:
-    """
-    Decrypt a string encrypted with Fernet.
+    """Decrypt a Fernet token and return the original plaintext value."""
 
-    Args:
-        value (str): Encrypted string (URL-safe base64 encoded).
-
-    Returns:
-        str: Decrypted plain text value.
-    """
     return _fernet.decrypt(value.encode()).decode()
