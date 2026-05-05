@@ -1,3 +1,10 @@
+"""
+django_totp.models
+===================
+
+This module defines the Django models for TOTP secrets and backup codes.
+"""
+
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
