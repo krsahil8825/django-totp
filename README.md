@@ -54,9 +54,9 @@ You can use it as:
 
 ## Requirements
 
-- Python 3.14+
-- Django 6.0.4+
-- Django REST Framework 3.17.1+
+- Python 3.12+
+- Django 5.0+
+- Django REST Framework 3.15+
 
 Installed dependencies used by this package:
 
