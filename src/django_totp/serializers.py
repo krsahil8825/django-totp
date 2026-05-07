@@ -30,7 +30,7 @@ class JWTCreateSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
 
-    is_totp_enabled = serializers.BooleanField(read_only=True, default=False)
+    is_totp_enabled = serializers.BooleanField(read_only=True)
     access = serializers.CharField(read_only=True, required=False)
     refresh = serializers.CharField(read_only=True, required=False)
     totp_challenge_token = serializers.CharField(read_only=True, required=False)
