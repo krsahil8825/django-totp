@@ -57,6 +57,9 @@ def confirm_totp_setup(user: User, input_code: str) -> List[str]:
     totp_qs = Totp.objects.filter(user=user).first()
     if not totp_qs:
         raise ValueError("User does not have an associated TOTP secret.")
+    
+    if BackupCode.objects.filter(totp=totp_qs).exists():
+        raise ValueError("Backup codes already exist for this user.")
 
     if not verify_totp_code(user, input_code):
         raise ValueError("Invalid TOTP code.")
