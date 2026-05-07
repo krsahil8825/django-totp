@@ -1,8 +1,48 @@
-# Exclude development-only Django project artifacts from sdist
-prune src/django_totp_project
+# Development and testing directories
+prune .github
+prune tests
+prune helper_html
+prune dist
+prune build
+prune node_modules
+
+# Virtual environments and caches
+prune .venv
+prune venv
+prune env
+prune .tox
+prune .pytest_cache
+prune .mypy_cache
+prune __pycache__
+
+# IDE/editor files
+prune .vscode
+prune .idea
+
+# Generated package metadata
+prune src/django_totp.egg-info
+prune *.egg-info
+
+# Local development files
 exclude src/manage.py
 exclude src/db.sqlite3
-prune src/django_totp.egg-info
-prune .helper_html
-prune .github
-prune helper_html
+exclude .env
+exclude .env.*
+exclude .DS_Store
+exclude *.py[cod]
+exclude *.swp
+exclude *.swo
+exclude *~
+exclude .coverage
+exclude coverage.xml
+exclude uv.lock
+exclude .python-version
+
+# Git files
+exclude .gitignore
+exclude .gitattributes
+
+# Documentation and contribution files
+exclude CONTRIBUTING.md
+exclude RELEASE.md
+exclude CODE_OF_CONDUCT.md
