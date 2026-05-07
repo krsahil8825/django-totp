@@ -100,6 +100,7 @@ class TotpViewSet(viewsets.GenericViewSet):
 class JWTCreateView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = JWTCreateSerializer
+    throttle_classes = [TotpThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -150,6 +151,7 @@ class JWTCreateView(GenericAPIView):
 class JWTTOTP2FAVerifyView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = JWT2FAVerifySerializer
+    throttle_classes = [TotpThrottle]
 
     def post(self, request, *args, **kwargs):
 
