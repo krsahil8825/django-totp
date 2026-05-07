@@ -1,5 +1,6 @@
 """High-level TOTP lifecycle helpers for Django users."""
 
+from cryptography.fernet import InvalidToken
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 
@@ -23,13 +24,22 @@ def generate_totp_secret() -> str:
 
 
 def verify_totp_code(user: User, input_code: str) -> bool:
-    """Verify a user's one-time code against the stored encrypted secret."""
+    """
+    Verify a user-provided TOTP code against the stored secret,
+    allowing for a 30-second clock skew.
+    """
 
     totp_qs = Totp.objects.filter(user=user).first()
     if not totp_qs:
         raise ValueError("User does not have an associated TOTP secret.")
 
-    totp = pyotp.TOTP(decrypt(totp_qs.secret_key))
+    try:
+        secret = decrypt(totp_qs.secret_key)
+    except InvalidToken:
+        # Treat decryption failure as invalid code
+        return False
+
+    totp = pyotp.TOTP(secret)
 
     return totp.verify(input_code, valid_window=1)
 
@@ -57,7 +67,7 @@ def confirm_totp_setup(user: User, input_code: str) -> List[str]:
     totp_qs = Totp.objects.filter(user=user).first()
     if not totp_qs:
         raise ValueError("User does not have an associated TOTP secret.")
-    
+
     if BackupCode.objects.filter(totp=totp_qs).exists():
         raise ValueError("Backup codes already exist for this user.")
 

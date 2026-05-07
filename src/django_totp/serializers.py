@@ -21,14 +21,14 @@ class BackupCodeListSerializer(serializers.Serializer):
 class TotpConfirmRequestSerializer(BackupCodeListSerializer):
     """Request payload used to confirm a TOTP enrollment."""
 
-    input_code = serializers.CharField(trim_whitespace=True, write_only=True)
+    input_code = serializers.CharField(trim_whitespace=True, write_only=True, max_length=12)
 
 
 class JWTCreateSerializer(serializers.Serializer):
     """Serializer for JWT authentication request."""
 
-    username = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True)
+    username = serializers.CharField(write_only=True, max_length=150)
+    password = serializers.CharField(write_only=True, max_length=255)
 
     is_totp_enabled = serializers.BooleanField(read_only=True)
     access = serializers.CharField(read_only=True, required=False)
@@ -39,9 +39,9 @@ class JWTCreateSerializer(serializers.Serializer):
 class JWT2FAVerifySerializer(serializers.Serializer):
     """Serializer for JWT 2FA verification request."""
 
-    totp_challenge_token = serializers.CharField(write_only=True)
-    otp_code = serializers.CharField(required=False, write_only=True)
-    backup_code = serializers.CharField(required=False, write_only=True)
+    totp_challenge_token = serializers.CharField(write_only=True, max_length=1024)
+    otp_code = serializers.CharField(required=False, write_only=True, max_length=12)
+    backup_code = serializers.CharField(required=False, write_only=True, max_length=64)
 
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
