@@ -15,8 +15,6 @@ TOKEN_MAX_AGE = getattr(django_settings, "TOTP_TOKEN_MAX_AGE", 120)  # 2 minutes
 
 def is_totp_enabled(user: User) -> bool:
     """Check if a user has TOTP authentication enabled."""
-    if not user.is_authenticated:
-        return False
 
     return Totp.objects.filter(user=user).exists()
 
