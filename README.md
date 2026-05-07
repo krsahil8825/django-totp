@@ -450,6 +450,21 @@ Useful helpers you can import directly:
     - encrypt(value)
     - decrypt(value)
 
+## Interactive Helper Tools
+
+The following utilities are available for development, debugging, and response inspection:
+
+- **SVG Viewer**  
+  Render and inspect SVG payloads returned by TOTP enrollment (create) endpoints.
+
+- **JSON to TXT Converter**  
+  Convert backup code JSON responses into plain-text downloadable format.
+
+Tool URL:
+
+https://django-totp-helper.pages.dev/
+
+
 ## Contributing
 
 Contributions are welcome! Please open issues for bugs or feature requests, and submit pull requests for any improvements.
