@@ -247,6 +247,26 @@ REST_FRAMEWORK = {
 }
 ```
 
+### SIMPLE_JWT Settings
+
+- Required: No (only if using JWT integration)
+- Purpose: Configure JWT behavior, token lifetimes, rotation, etc.
+- Docs: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+
+```python
+# settings.py
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    # other settings as needed...
+}
+```
+
 ## API Endpoints
 
 Base path assumes you include `django_totp.urls` at /api/. For JWT endpoints, include `django_totp.urls.jwt` at the same base path.
