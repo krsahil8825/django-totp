@@ -86,7 +86,7 @@ In Django settings:
 
 Generate a Fernet key once:
 
-    python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+    python -c "from django_totp.encryption import generate_fernet_key; print(generate_fernet_key())"
 
 Add it as an environment variable:
 
