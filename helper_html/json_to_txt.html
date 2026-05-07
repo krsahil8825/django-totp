@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>JSON to TXT</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                color: #333;
+            }
+
+            header {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 1.5rem 0;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .header-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+                font-weight: 700;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                letter-spacing: -0.5px;
+            }
+
+            nav a {
+                color: #667eea;
+                text-decoration: none;
+                margin-left: 2rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            nav a:hover {
+                color: #764ba2;
+            }
+
+            main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 3rem 2rem;
+            }
+
+            .wrap {
+                max-width: 900px;
+                width: 100%;
+                background: white;
+                border-radius: 16px;
+                padding: 2.5rem;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                font-size: 2.2rem;
+                color: #333;
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            }
+
+            .hint {
+                color: #666;
+                margin-bottom: 1.5rem;
+                font-size: 1rem;
+            }
+
+            label {
+                display: block;
+                font-weight: 600;
+                color: #333;
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            textarea,
+            input {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-family: Consolas, monospace;
+                font-size: 14px;
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            textarea {
+                min-height: 220px;
+                resize: vertical;
+            }
+
+            input {
+                margin-bottom: 0;
+            }
+
+            textarea:focus,
+            input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            button {
+                margin: 20px 0;
+                padding: 10px 16px;
+                border: 0;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #fff;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+
+            #preview {
+                margin-top: 20px;
+                padding: 20px;
+                background: #f9f9f9;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                white-space: pre-wrap;
+                font-family: Consolas, monospace;
+                overflow: auto;
+                min-height: 120px;
+            }
+
+            footer {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 2rem;
+                text-align: center;
+                color: #666;
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+                margin-top: auto;
+            }
+
+            footer p {
+                font-size: 0.95rem;
+            }
+
+            @media (max-width: 768px) {
+                .header-content {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                nav {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: center;
+                }
+
+                nav a {
+                    margin-left: 0;
+                }
+
+                .wrap {
+                    margin: 1rem;
+                }
+
+                h1 {
+                    font-size: 1.8rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo">🔐 TOTP Tools</div>
+                <nav>
+                    <a href="index.html">← Back to Home</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <div class="wrap">
+                <h1>📝 JSON to TXT</h1>
+                <p class="hint">Paste JSON like {"backup_codes":["code1","code2"]}, then download a text file.</p>
+
+                <label for="filename">File name</label>
+                <input id="filename" type="text" value="backup_codes.txt" />
+
+                <label for="input">JSON input</label>
+                <textarea id="input" spellcheck="false" placeholder='Paste JSON here'></textarea>
+
+                <button type="button" onclick="downloadTxt()">Download TXT</button>
+
+                <div id="preview"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Django TOTP Helper Tools. All rights reserved.</p>
+        </footer>
+
+        <script>
+            function jsonToTxt(value, key = 'backup_codes') {
+                let data = value;
+
+                if (typeof data === 'string') {
+                    const trimmed = data.trim();
+                    if (!trimmed) {
+                        return '';
+                    }
+
+                    data = JSON.parse(trimmed);
+                }
+
+                if (!data || typeof data !== 'object') {
+                    return '';
+                }
+
+                const codes = data[key];
+                if (!Array.isArray(codes)) {
+                    return '';
+                }
+
+                return codes
+                    .map((item) => String(item).trim())
+                    .filter(Boolean)
+                    .join('\n');
+            }
+
+            function downloadTxt() {
+                const inputValue = document.getElementById('input').value;
+                const fileName = document.getElementById('filename').value.trim() || 'output.txt';
+                let text = '';
+
+                try {
+                    text = jsonToTxt(inputValue, 'backup_codes');
+                } catch (error) {
+                    document.getElementById('preview').textContent = 'Invalid JSON input.';
+                    return;
+                }
+
+                if (!text) {
+                    document.getElementById('preview').textContent = 'No backup_codes array found.';
+                    return;
+                }
+
+                document.getElementById('preview').textContent = text;
+
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName.endsWith('.txt') ? fileName : `${fileName}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            }
+        </script>
+    </body>
+
+</html>

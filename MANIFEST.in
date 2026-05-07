@@ -4,3 +4,5 @@ exclude src/manage.py
 exclude src/db.sqlite3
 prune src/django_totp.egg-info
 prune .helper_html
+prune .github
+prune helper_html

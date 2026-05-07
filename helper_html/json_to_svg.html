@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SVG Viewer</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                color: #333;
+            }
+
+            header {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 1.5rem 0;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .header-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 2rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+                font-weight: 700;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                letter-spacing: -0.5px;
+            }
+
+            nav a {
+                color: #667eea;
+                text-decoration: none;
+                margin-left: 2rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            nav a:hover {
+                color: #764ba2;
+            }
+
+            main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 3rem 2rem;
+            }
+
+            .wrap {
+                max-width: 900px;
+                width: 100%;
+                background: white;
+                border-radius: 16px;
+                padding: 2.5rem;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                font-size: 2.2rem;
+                color: #333;
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            }
+
+            .hint {
+                color: #666;
+                margin-bottom: 1.5rem;
+                font-size: 1rem;
+            }
+
+            textarea {
+                width: 100%;
+                min-height: 220px;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-family: Consolas, monospace;
+                font-size: 14px;
+                box-sizing: border-box;
+                resize: vertical;
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            textarea:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            button {
+                margin: 12px 0;
+                padding: 10px 16px;
+                border: 0;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #fff;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+
+            #preview {
+                margin-top: 20px;
+                padding: 20px;
+                background: #f9f9f9;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: auto;
+                min-height: 120px;
+            }
+
+            footer {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 2rem;
+                text-align: center;
+                color: #666;
+                border-top: 1px solid rgba(0, 0, 0, 0.05);
+                margin-top: auto;
+            }
+
+            footer p {
+                font-size: 0.95rem;
+            }
+
+            @media (max-width: 768px) {
+                .header-content {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                nav {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: center;
+                }
+
+                nav a {
+                    margin-left: 0;
+                }
+
+                .wrap {
+                    margin: 1rem;
+                }
+
+                h1 {
+                    font-size: 1.8rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <div class="header-content">
+                <div class="logo">🔐 TOTP Tools</div>
+                <nav>
+                    <a href="index.html">← Back to Home</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <div class="wrap">
+                <h1>🖼️ SVG Viewer</h1>
+                <p class="hint">Paste a JSON response or raw SVG, then render it.</p>
+
+                <textarea id="input" spellcheck="false" placeholder='Paste JSON like {"svg":"..."} or a raw SVG string'></textarea>
+                <br />
+                <button type="button" onclick="render()">Render SVG</button>
+
+                <div id="preview"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 Django TOTP Helper Tools. All rights reserved.</p>
+        </footer>
+
+        <script>
+            function jsonToSvg(value) {
+                let data = value;
+
+                if (typeof data === 'string') {
+                    const trimmed = data.trim();
+                    if (!trimmed) {
+                        return '';
+                    }
+
+                    try {
+                        data = JSON.parse(trimmed);
+                    } catch (error) {
+                        return trimmed
+                            .replace(/\\n/g, '\n')
+                            .replace(/\\r/g, '\r')
+                            .replace(/\\t/g, '\t')
+                            .replace(/\\"/g, '"')
+                            .replace(/\\\\/g, '\\')
+                            .replace(/svg:/g, '')
+                            .replace(/xmlns:svg=/g, 'xmlns=');
+                    }
+                }
+
+                if (data && typeof data === 'object') {
+                    if (typeof data.svg === 'string') {
+                        return data.svg
+                            .replace(/svg:/g, '')
+                            .replace(/xmlns:svg=/g, 'xmlns=');
+                    }
+
+                    return '';
+                }
+
+                return '';
+            }
+
+            function render() {
+                const input = document.getElementById('input').value;
+                const svg = jsonToSvg(input);
+                document.getElementById('preview').innerHTML = svg;
+            }
+        </script>
+    </body>
+
+</html>
