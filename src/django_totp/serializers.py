@@ -1,6 +1,9 @@
 """Serializer definitions for the django_totp API layer."""
 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+
+User = get_user_model()
 
 
 class EmptySerializer(serializers.Serializer):
@@ -35,7 +38,13 @@ class TotpConfirmRequestSerializer(BackupCodeListSerializer):
 class JWTCreateSerializer(serializers.Serializer):
     """Serializer for JWT authentication request."""
 
-    username = serializers.CharField(write_only=True, max_length=150)
+    username_field = User.USERNAME_FIELD
+
+    # Dynamic field name
+    locals()[username_field] = serializers.CharField(
+        write_only=True,
+        max_length=150,
+    )
     password = serializers.CharField(write_only=True, max_length=255)
 
     is_totp_enabled = serializers.BooleanField(read_only=True)

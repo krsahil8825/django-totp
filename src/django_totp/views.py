@@ -109,7 +109,7 @@ class JWTCreateView(GenericAPIView):
 
         user = authenticate(
             request,
-            username=serializer.validated_data["username"],
+            username=serializer.validated_data[serializer.username_field],
             password=serializer.validated_data["password"],
         )
 
