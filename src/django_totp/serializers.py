@@ -3,6 +3,12 @@
 from rest_framework import serializers
 
 
+class EmptySerializer(serializers.Serializer):
+    """Placeholder serializer for actions requiring no input/output."""
+
+    pass
+
+
 class TotpCreateResponseSerializer(serializers.Serializer):
     """Serialized response for TOTP enrollment initiation."""
 
@@ -21,7 +27,9 @@ class BackupCodeListSerializer(serializers.Serializer):
 class TotpConfirmRequestSerializer(BackupCodeListSerializer):
     """Request payload used to confirm a TOTP enrollment."""
 
-    input_code = serializers.CharField(trim_whitespace=True, write_only=True, max_length=12)
+    input_code = serializers.CharField(
+        trim_whitespace=True, write_only=True, max_length=12
+    )
 
 
 class JWTCreateSerializer(serializers.Serializer):
@@ -56,7 +64,7 @@ class JWT2FAVerifySerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Either otp_code or backup_code is required."
             )
-        
+
         if otp_code and backup_code:
             raise serializers.ValidationError(
                 "Provide only one of otp_code or backup_code, not both."

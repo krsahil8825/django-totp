@@ -16,6 +16,7 @@ from .auth import (
 from .backup_code_utils import rotate_backup_codes, verify_backup_code
 from .serializers import (
     BackupCodeListSerializer,
+    EmptySerializer,
     JWTCreateSerializer,
     JWT2FAVerifySerializer,
     TotpConfirmRequestSerializer,
@@ -39,7 +40,7 @@ class TotpViewSet(viewsets.GenericViewSet):
         elif self.action == "confirm":
             return TotpConfirmRequestSerializer
         elif self.action == "disable":
-            return None
+            return EmptySerializer
         elif self.action == "rotate_backup_codes":
             return BackupCodeListSerializer
         return super().get_serializer_class()
