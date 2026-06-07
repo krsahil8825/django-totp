@@ -1,11 +1,14 @@
 """Authentication helpers for 2FA login flow with temporary tokens."""
 
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.conf import settings as django_settings
 from django.core import signing
 from django.core.signing import BadSignature, SignatureExpired
 
 from .models import Totp
+
+AUTH_USER_MODEL = get_user_model()
 
 
 # Configurable settings for token generation and verification
@@ -38,18 +41,22 @@ def verify_challenge_token(token: str) -> int:
             salt=TOKEN_SALT,
             max_age=TOKEN_MAX_AGE,
         )
+
+        if data.get("purpose") != "totp_verification":
+            raise BadSignature("Invalid token purpose.")
+
         return data["user_id"]
 
     except SignatureExpired as exc:
         raise SignatureExpired("TOTP token has expired.") from exc
 
-    except BadSignature as exc:
+    except (BadSignature, KeyError) as exc:
         raise BadSignature("Invalid or tampered TOTP token.") from exc
 
 
 def get_user_from_challenge_token(token: str) -> User:
     """Retrieve a user from a signed TOTP verification token."""
     try:
-        return User.objects.get(id=verify_challenge_token(token))
-    except User.DoesNotExist:
-        raise User.DoesNotExist("User not found.")
+        return AUTH_USER_MODEL.objects.get(id=verify_challenge_token(token))
+    except AUTH_USER_MODEL.DoesNotExist:
+        raise AUTH_USER_MODEL.DoesNotExist("User not found.")
