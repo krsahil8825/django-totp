@@ -77,3 +77,8 @@ dev = [
     "pytest>=9.0.3",
     "pytest-django>=4.12.0",
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "django_totp_project.settings"
+python_files = ["test_*.py", " *_tests.py"]
+python_classes = ["Test*", "Post*"]
