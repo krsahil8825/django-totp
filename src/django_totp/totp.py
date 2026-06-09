@@ -53,24 +53,32 @@ def verify_totp_code(user: User, input_code: str) -> bool:
 def create_totp_setup(user: User) -> str:
     """Create and persist a new TOTP secret, then return the QR-code SVG."""
 
-    if Totp.objects.filter(user=user).exists():
-        raise ValueError("TOTP already exists for this user.")
+    with transaction.atomic():
+        existing_totp = Totp.objects.filter(user=user).first()
 
-    secret = generate_totp_secret()
+        if existing_totp:
+            if BackupCode.objects.filter(totp=existing_totp).exists():
+                raise ValueError(
+                    "TOTP is already enabled. Disable it before creating a new one."
+                )
 
-    try:
-        Totp.objects.create(
-            user=user,
-            secret_key=encrypt(secret),
+            existing_totp.delete()
+
+        secret = generate_totp_secret()
+
+        try:
+            Totp.objects.create(
+                user=user,
+                secret_key=encrypt(secret),
+            )
+        except IntegrityError:
+            raise ValueError("TOTP already exists for this user.")
+
+        uri = pyotp.TOTP(secret).provisioning_uri(
+            name=user.get_username(), issuer_name=TOTP_ISSUER
         )
-    except IntegrityError:
-        raise ValueError("TOTP already exists for this user.")
 
-    uri = pyotp.TOTP(secret).provisioning_uri(
-        name=user.get_username(), issuer_name=TOTP_ISSUER
-    )
-
-    return render_qr_code_svg(uri)
+        return render_qr_code_svg(uri)
 
 
 def confirm_totp_setup(user: User, input_code: str) -> List[str]:
