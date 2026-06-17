@@ -91,6 +91,13 @@ class JWT2FAVerifySerializer(serializers.Serializer):
         return attrs
 
 
+class TotpRecoveryRequestSerializer(serializers.Serializer):
+    """Serializer for TOTP recovery request."""
+
+    email = serializers.EmailField(write_only=True)
+    details = serializers.CharField(read_only=True)
+
+
 class TotpRecoverySerializer(serializers.Serializer):
     """Serializer for TOTP recovery request."""
 
