@@ -46,18 +46,10 @@ User = get_user_model()
 
 
 class TotpViewSet(viewsets.GenericViewSet):
-    """Expose TOTP enrollment, confirmation, and recovery endpoints."""
+    """Expose TOTP enrollment, confirmation, and management endpoints."""
 
     permission_classes = [IsAuthenticated]
-    throttle_classes = [TotpUserThrottle, TotpAnonThrottle]
-    token_generator = default_token_generator
-
-    def get_permission_classes(self):
-        """Return the permission classes that match the current action."""
-
-        if self.action in ["recovery", "recovery_confirm"]:
-            return [AllowAny]
-        return super().get_permission_classes()
+    throttle_classes = [TotpUserThrottle]
 
     def get_serializer_class(self):
         """Return the serializer that matches the current action."""
@@ -70,10 +62,6 @@ class TotpViewSet(viewsets.GenericViewSet):
             return EmptySerializer
         elif self.action == "rotate_backup_codes":
             return BackupCodeListSerializer
-        elif self.action == "recovery":
-            return TotpRecoveryRequestSerializer
-        elif self.action == "recovery_confirm":
-            return TotpRecoverySerializer
         return super().get_serializer_class()
 
     # "enroll" is used due to "create" being reserved for generic viewsets
@@ -144,9 +132,26 @@ class TotpViewSet(viewsets.GenericViewSet):
 
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
+
+class TotpRecoveryViewSet(viewsets.GenericViewSet):
+    """Expose TOTP recovery endpoints."""
+
+    permission_classes = [AllowAny]
+    throttle_classes = [TotpUserThrottle, TotpAnonThrottle]
+    token_generator = default_token_generator
+
+    def get_serializer_class(self):
+        """Return the serializer that matches the current action."""
+
+        if self.action == "recovery":
+            return TotpRecoveryRequestSerializer
+        elif self.action == "recovery_confirm":
+            return TotpRecoverySerializer
+        return super().get_serializer_class()
+
     @action(detail=False, methods=["post"], url_path="recovery")
     def recovery(self, request):
-        """Initiate TOTP recovery flow by sending an email with a recovery link."""
+        """Send a TOTP recovery email to the user if they have TOTP enabled."""
 
         request_serializer = self.get_serializer(data=request.data)
         request_serializer.is_valid(raise_exception=True)
@@ -172,10 +177,9 @@ class TotpViewSet(viewsets.GenericViewSet):
 
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["post"], url_path="recovery-confirm")
+    @action(detail=False, methods=["post"], url_path="recovery_confirm")
     def recovery_confirm(self, request):
-        """Complete TOTP recovery by validating the recovery token and
-        current password, then disabling TOTP on the account."""
+        """Confirm TOTP recovery by validating the recovery token and current password, then disabling TOTP on the account."""
 
         request_serializer = self.get_serializer(data=request.data)
         request_serializer.is_valid(raise_exception=True)
