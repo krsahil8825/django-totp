@@ -44,23 +44,3 @@ For pre-release versions:
 ```bash
 pip install --pre django-totp
 ```
-
-## Recommended Release Flow
-
-For a typical release, run the following commands in order:
-
-```bash
-git tag v0.1.0a1
-
-git push origin v0.1.0a1
-```
-
-One more important thing:
-
-Since this is an alpha release, users usually need:
-
-```bash
-pip install --pre django-totp
-```
-
-Because pip ignores pre-releases by default unless you explicitly allow them.
