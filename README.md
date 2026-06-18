@@ -461,11 +461,11 @@ Success response (200): an empty body indicates a valid token.
 
 Both recovery emails are rendered from a single Django template per email, split into named blocks rather than separate subject/body files:
 
-| Block                   | Used for                                                               |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `{% block subject %}`   | Email subject line                                                     |
-| `{% block text_body %}` | Plain-text body (always attached)                                      |
-| `{% block html_body %}` | HTML alternative (attached if both bodies render to non-empty content) |
+| Block                           | Used for                                                               |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| &#123;% block subject %&#125;   | Email subject line                                                     |
+| &#123;% block text_body %&#125; | Plain-text body (always attached)                                      |
+| &#123;% block html_body %&#125; | HTML alternative (attached if both bodies render to non-empty content) |
 
 Override either template by placing a file at the same relative path earlier in your template loader's search order, or by pointing `TOTP_RECOVERY_EMAIL_TEMPLATE` / `TOTP_DISABLED_EMAIL_TEMPLATE` at a different path entirely. Available context variables:
 
